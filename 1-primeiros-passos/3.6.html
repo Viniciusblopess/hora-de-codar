@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        //3.6. Leia 6 notas válidas (de 0 a 10), calcule e exiba a média simples.
+
+        var nota1 = Number(prompt("Digite a primeira nota: "));
+        while (nota1 < 0 || nota1 > 10) {
+            nota1 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var nota2 = Number(prompt("Digite a segunda nota: "));
+        while (nota2 < 0 || nota2 > 10) {
+            nota2 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var nota3 = Number(prompt("Digite a terceira nota: "));
+        while (nota3 < 0 || nota3 > 10) {
+            nota3 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var nota4 = Number(prompt("Digite a quarta nota: "));
+        while (nota4 < 0 || nota4 > 10) {
+            nota4 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var nota5 = Number(prompt("Digite a quinta nota: "));
+        while (nota5 < 0 || nota5 > 10) {
+            nota5 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var nota6 = Number(prompt("Digite a sexta nota: "));
+        while (nota6 < 0 || nota6 > 10) {
+            nota6 = Number(prompt("Nota inválida! Digite novamente: "));
+        }
+
+        var soma = nota1 + nota2 +  nota3 + nota4 + nota5 + nota6;
+        var media = soma/6;
+        alert("Média: " + media);
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>

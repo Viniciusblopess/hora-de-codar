@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        //3.4. Leia dois inteiros (sendo o primeiro menor que o segundo) e calcule a média desses números e de todos os inteiros entre eles.
+
+        var numero1 = Number(prompt("Digite um numero: "));
+        var numero2 = Number(prompt("Digite o segundo numero e tem que ser maior que o primeiro: "));
+
+        while(numero1 >= numero2){
+           numero2 = Number(prompt("Digite novamente o segundo numero e tem que ser maior que o primeiro: ")); 
+        }
+        var soma = 0;
+        var quantidade = 0;
+
+        for(var contador = numero1; contador <= numero2; contador++){
+            soma = soma + contador;
+            quantidade++;
+        }
+       var media = soma/quantidade;
+        alert(media);
+    </script>
+</head>
+<body>
+    
+</body>
+</html>
