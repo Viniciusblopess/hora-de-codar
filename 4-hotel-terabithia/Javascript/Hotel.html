@@ -1,64 +1,128 @@
-<html>
+﻿<!doctype html>
+<html lang="pt-BR">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hotel Terabithia | Operações</title>
+  <style>
+    body {
+      font: 16px Arial, sans-serif;
+      max-width: 760px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+      color: #24313b
+    }
 
-	<script>
-	
+    h1 {
+      color: #245b67
+    }
 
-		function inicio() {
+    button {
+      padding: .65rem 1rem;
+      margin: .25rem;
+      background: #245b67;
+      color: white;
+      border: 0;
+      border-radius: 4px;
+      cursor: pointer
+    }
 
-			var escolha = parseInt(prompt('Selecione uma opção 1.) Reserva de Quartos 2.) Cadastro de Hóspedes 3.) Abastecimento de Carros 4.) Sair'));
-
-			if (escolha === 1) {
-				reserva_quartos();
-			} else if (escolha === 2) {
-				cadastro_hospedes();
-			} else if (escolha === 3) {
-				abastecer_carros();
-			} else if (escolha === 4) {
-				sair();
-			} else {
-				erro();
-			}
-		}		
-
-		function reserva_quartos() {
-			alert('HOTEL {NOME DO HOTEL} - RESERVA DE QUARTOS');
-			inicio();
-		}
-
-		function cadastro_hospedes() {
-			alert('HOTEL {NOME DO HOTEL} - CADASTRO DE HÓSPEDES');
-			inicio();
-		}
-
-		function abastecer_carros() {
-			alert('HOTEL {NOME DO HOTEL} - ABASTECER');
-			inicio();
-		}
-
-		function erro() {
-			alert('Por favor, informe um número entre 1 e 4');
-			inicio();
-		}
-
-		function sair() {
-			var confirma = confirm('Você deseja sair?');
-			if (confirma) {
-				window.close();
-			} else {
-				inicio();
-			}
-		}
-
-		
-		
-		inicio();
-	</script>
+    #status {
+      white-space: pre-wrap;
+      background: #f1f5f6;
+      padding: 1rem;
+      border-radius: 5px;
+      min-height: 4rem
+    }
+  </style>
 </head>
 
 <body>
-
+  <h1>Hotel Terabithia</h1>
+  <p>Plataforma interna de operações</p>
+  <p>Use as caixas de diálogo para navegar pelo sistema.</p>
+  <div id="status" aria-live="polite">Iniciando…</div>
+  <script>
+    (() => {
+      'use strict';
+      const hotel = 'Terabithia', senhaCorreta = '2678', quartos = Array(20).fill(null);
+      const estado = { reservas: [], hospedes: [], eventos: [], orcamentos: [] };
+      const $status = document.getElementById('status');
+      const exibir = (s) => { $status.textContent = s; };
+      const perguntar = (texto) => window.prompt(texto);
+      const dinheiro = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      const numero = (texto, { min = -Infinity, max = Infinity, inteiro = false, estritamenteMaior = false } = {}) => {
+        while (true) {
+          const raw = perguntar(texto); if (raw === null) return null; const v = Number(raw.trim().replace(',', '.'));
+          if (Number.isFinite(v) && (!inteiro || Number.isInteger(v)) && (estritamenteMaior ? v > min : v >= min) && v <= max) return v;
+          alert('Valor inválido. Tente novamente.');
+        }
+      };
+      const escolha = (texto, validos) => { while (true) { const v = perguntar(texto); if (v === null) return null; const t = v.trim().toUpperCase(); if (validos.includes(t)) return t; alert('Opção inválida.'); } };
+      function nomeValido(texto) { while (true) { const n = perguntar(texto); if (n === null) return null; if (n.trim()) return n.trim(); alert('Informe um nome válido.'); } }
+      function falha() { alert('Opção inválida. Informe uma opção disponível.'); }
+      function autenticar() {
+        alert(`Bem-vindo ao ${hotel}`); const usuario = nomeValido('Nome do usuário:'); if (usuario === null) return null;
+        for (let tentativa = 1; tentativa <= 3; tentativa++) { const s = perguntar('Senha:'); if (s === senhaCorreta) { alert(`Bem-vindo ao Hotel ${hotel}, ${usuario}. É um imenso prazer ter você por aqui!`); return usuario; } if (tentativa < 3) alert(`Senha incorreta. Tentativa ${tentativa + 1} de 3.`); }
+        alert('Acesso bloqueado. Número máximo de tentativas excedido.'); return null;
+      }
+      function mapa() { const linhas = []; for (let i = 0; i < 20; i += 5)linhas.push(quartos.slice(i, i + 5).map((q, j) => `${String(i + j + 1).padStart(2, '0')}:${q ? 'O' : 'L'}`).join('  ')); return linhas.join('\n'); }
+      function reservas(usuario) {
+        while (true) {
+          const diariaRaw = perguntar('Informe o valor da diária (maior que zero):'); if (diariaRaw === null) return;
+          const diaria = Number(diariaRaw.trim().replace(',', '.'));
+          if (!Number.isFinite(diaria) || diaria <= 0) { alert(`Valor inválido, ${usuario}`); return; }
+          const diasRaw = perguntar('Informe a quantidade de diárias (1-30):'); if (diasRaw === null) return;
+          const dias = Number(diasRaw.trim());
+          if (!Number.isInteger(dias) || dias < 1 || dias > 30) { alert(`Valor inválido, ${usuario}`); return; }
+          const hospede = nomeValido('Nome completo do hóspede:'); if (hospede === null) return; const tipo = escolha('Tipo de quarto: S-standard, E-executivo, L-luxo:', ['S', 'E', 'L']); if (tipo === null) return;
+          const fatores = { S: 1, E: 1.35, L: 1.65 }, tipos = { S: 'Standard', E: 'Executivo', L: 'Luxo' }; let quarto;
+          while (quarto === undefined) { const livres = quartos.map((q, i) => q ? null : i + 1).filter(Boolean); if (!livres.length) { alert('Não há quartos livres.'); return; } const q = numero(`Quartos livres: ${livres.join(', ')}\nEscolha um quarto (1-20):`, { min: 1, max: 20, inteiro: true }); if (q === null) return; if (quartos[q - 1]) alert('Quarto já está ocupado. Escolha outro.'); else quarto = q; }
+          const subtotal = diaria * dias * fatores[tipo], taxa = subtotal * .1, total = subtotal + taxa;
+          const ok = escolha(`Resumo:\nHóspede: ${hospede}\nQuarto: ${quarto} (${tipos[tipo]})\nDiárias: ${dias}\nSubtotal: ${dinheiro(subtotal)}\nTaxa de serviço (10%): ${dinheiro(taxa)}\nTotal: ${dinheiro(total)}\n\n${usuario}, confirma a reserva? (S/N)`, ['S', 'N']);
+          if (ok === 'S') { const registro = { hospede, quarto, dias, total }; quartos[quarto - 1] = registro; estado.reservas.push(registro); alert('Reserva efetuada com sucesso.\n\nMapa de quartos (L livre, O ocupado):\n' + mapa()); } else if (ok === 'N') alert('Reserva não efetuada.'); return;
+        }
+      }
+      function hospedes() {
+        while (true) {
+          const op = perguntar('[Cadastro de Hóspedes]\n1 Cadastrar  2 Pesquisar exato  3 Pesquisar prefixo  4 Listar A-Z  5 Atualizar  6 Remover  7 Voltar'); if (op === null || op === '7') return;
+          if (op === '1') { if (estado.hospedes.length >= 15) { alert('Máximo de cadastros atingido'); continue; } const n = nomeValido('Nome do hóspede:'); if (n === null) continue; if (estado.hospedes.some(h => h.nome.toLocaleLowerCase('pt-BR') === n.toLocaleLowerCase('pt-BR'))) { alert('Hóspede já cadastrado'); continue; } estado.hospedes.push({ nome: n, criado: new Date() }); alert('Operação realizada com sucesso'); }
+          else if (op === '2') { const n = nomeValido('Nome exato para pesquisar:'); if (n === null) continue; const h = estado.hospedes.find(x => x.nome.toLocaleLowerCase('pt-BR') === n.toLocaleLowerCase('pt-BR')); alert(h ? `Hóspede ${h.nome} foi encontrado` : 'Hóspede não encontrado'); }
+          else if (op === '3') { const p = perguntar('Prefixo:'); if (p === null) continue; const encontrados = estado.hospedes.filter(h => h.nome.toLocaleLowerCase('pt-BR').startsWith(p.trim().toLocaleLowerCase('pt-BR'))); alert(encontrados.length ? 'Resultados:\n' + encontrados.map(h => h.nome).join('\n') : 'Hóspede não encontrado'); }
+          else if (op === '4') { const lista = [...estado.hospedes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')); alert(lista.length ? lista.map((h, i) => `[${i + 1}] ${h.nome} — ${h.criado.toLocaleString('pt-BR')}`).join('\n') : 'Nenhum hóspede cadastrado.'); }
+          else if (op === '5' || op === '6') { const lista = [...estado.hospedes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')); if (!lista.length) { alert('Nenhum hóspede cadastrado.'); continue; } const idx = numero('Índice do hóspede:\n' + lista.map((h, i) => `[${i + 1}] ${h.nome}`).join('\n'), { min: 1, max: lista.length, inteiro: true }); if (idx === null) continue; const alvo = lista[idx - 1], pos = estado.hospedes.indexOf(alvo); if (op === '5') { const n = nomeValido('Novo nome:'); if (n === null) continue; if (estado.hospedes.some((h, i) => i !== pos && h.nome.toLocaleLowerCase('pt-BR') === n.toLocaleLowerCase('pt-BR'))) { alert('Hóspede já cadastrado'); continue; } alvo.nome = n; } else estado.hospedes.splice(pos, 1); alert('Operação realizada com sucesso'); }
+          else falha();
+        }
+      }
+      function eventos() {
+        const convidados = numero('[Eventos] Convidados (0-350):', { min: 0, max: 350, inteiro: true }); if (convidados === null) return; const aud = convidados <= 220 ? 'Laranja' : 'Colorado', extras = aud === 'Laranja' ? Math.max(0, convidados - 150) : 0; alert(`Auditório selecionado: ${aud}${extras ? ` (${extras} cadeiras adicionais)` : ''}`);
+        const dia = perguntar('Dia da semana (segunda, terça, quarta, quinta, sexta, sábado ou domingo):'); if (dia === null) return; const d = dia.trim().toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); const fimSemana = ['sabado', 'domingo'].includes(d); if (!['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'].includes(d)) { alert('Dia da semana inválido.'); return; }
+        const data = perguntar('Data do evento (AAAA-MM-DD):'); if (data === null) return;
+        const dataPartes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.trim());
+        if (!dataPartes) { alert('Data inválida. Use o formato AAAA-MM-DD.'); return; }
+        const dataObj = new Date(Number(dataPartes[1]), Number(dataPartes[2]) - 1, Number(dataPartes[3]), 12);
+        if (dataObj.getFullYear() !== Number(dataPartes[1]) || dataObj.getMonth() !== Number(dataPartes[2]) - 1 || dataObj.getDate() !== Number(dataPartes[3])) { alert('Data inválida.'); return; }
+        const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+        if (diasSemana[dataObj.getDay()] !== d) { alert('A data informada não corresponde ao dia da semana.'); return; }
+        const hora = numero('Hora inicial (0-23):', { min: 0, max: 23, inteiro: true }); if (hora === null) return; const dur = numero('Duração (1-12 horas):', { min: 1, max: 12, inteiro: true }); if (dur === null) return; const limite = fimSemana ? 15 : 23; if (hora < 7 || hora + dur > limite) { alert('Auditório indisponível nesse horário. O evento precisa terminar dentro da janela do dia.'); return; }
+        if (estado.eventos.some(e => e.data === data.trim() && hora < e.fim && hora + dur > e.hora)) { alert('Auditório indisponível: já existe uma reserva nesse horário.'); return; }
+        const empresa = nomeValido('Nome da empresa:'); if (empresa === null) return; const garcons = Math.ceil(convidados / 12) + Math.floor(dur / 2), custoGarcons = garcons * dur * 10.5, cafe = convidados * .2, agua = convidados * .5, salgados = convidados * 7, custoBuffet = cafe * .8 + agua * .4 + salgados / 100 * 34, total = custoGarcons + custoBuffet;
+        const confirmado = escolha(`[Relatório do evento]\nAuditório: ${aud}\nEmpresa: ${empresa}\nData: ${data.trim()} (${dia})\nHorário: ${hora}h-${hora + dur}h\nConvidados: ${convidados}\nGarçons: ${garcons}\nDuração: ${dur}h\nCusto garçons: ${dinheiro(custoGarcons)}\nBuffet: café ${cafe.toLocaleString('pt-BR')} L, água ${agua.toLocaleString('pt-BR')} L, salgados ${salgados} un\nCusto buffet: ${dinheiro(custoBuffet)}\nTotal geral: ${dinheiro(total)}\n\nConfirmar reserva? (S/N)`, ['S', 'N']); if (confirmado === 'S') { estado.eventos.push({ dia: d, data: data.trim(), hora, fim: hora + dur, empresa, convidados, total }); alert('Reserva efetuada com sucesso.'); } else alert('Reserva não efetuada.');
+      }
+      function arCondicionado(usuario) {
+        const propostas = []; while (true) { const empresa = nomeValido('[Ar-Condicionado] Empresa:'); if (empresa === null) break; const valor = numero('Valor por aparelho:', { min: 0 }); if (valor === null) break; const qtd = numero('Quantidade de aparelhos:', { min: 1, inteiro: true }); if (qtd === null) break; const pct = numero('Desconto (%):', { min: 0, max: 100 }); if (pct === null) break; const minimo = numero('Quantidade mínima para desconto:', { min: 0, inteiro: true }); if (minimo === null) break; const desloc = numero('Deslocamento (R$):', { min: 0 }); if (desloc === null) break; const bruto = valor * qtd, total = bruto - (qtd >= minimo ? bruto * pct / 100 : 0) + desloc; propostas.push({ empresa, total }); alert(`O serviço de ${empresa} custará ${dinheiro(total)}`); const continuar = escolha(`Deseja informar novos dados, ${usuario}? (S/N)`, ['S', 'N']); if (continuar === 'N' && propostas.length < 2) { alert('Informe ao menos duas empresas para comparar os orçamentos.'); continue; } if (continuar === 'N') break; }
+        if (propostas.length) { const vals = propostas.map(p => p.total), min = Math.min(...vals), max = Math.max(...vals), melhor = propostas.find(p => p.total === min), pior = propostas.find(p => p.total === max), dif = min === 0 ? (max === 0 ? 0 : Infinity) : (max - min) / min * 100; alert(`Melhor orçamento: ${melhor.empresa} — ${dinheiro(min)}\nMaior orçamento: ${pior.empresa} — ${dinheiro(max)}\nDiferença percentual: ${Number.isFinite(dif) ? dif.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + '%' : 'não calculável'}`); estado.orcamentos.push(...propostas); }
+      }
+      function abastecimento(usuario) {
+        const postos = []; for (const nome of ['Wayne Oil', 'Stark Petrol']) { const et = numero(`[Abastecimento] ${nome} — preço do álcool:`, { min: 0, estritamenteMaior: true }); if (et === null) return; const gas = numero(`${nome} — preço da gasolina:`, { min: 0, estritamenteMaior: true }); if (gas === null) return; const usarEt = et <= gas * .7, preco = usarEt ? et : gas; postos.push({ nome, comb: usarEt ? 'álcool' : 'gasolina', total: preco * 42 }); }
+        postos.sort((a, b) => a.total - b.total); const rel = postos.map(p => `${p.nome}: melhor opção = ${p.comb} | Total (42L) = ${dinheiro(p.total)}`).join('\n'); alert(`${rel}\n\n${usuario}, é mais barato abastecer com ${postos[0].comb} no posto ${postos[0].nome}.`);
+      }
+      function relatorios() { const ocupados = quartos.filter(Boolean).length, hospedagem = estado.reservas.reduce((s, r) => s + r.total, 0), eventos = estado.eventos.reduce((s, e) => s + e.total, 0); alert(`[Relatórios Operacionais]\nReservas confirmadas: ${estado.reservas.length}\nOcupação atual: ${ocupados}/20 (${(ocupados / 20 * 100).toLocaleString('pt-BR')}%)\nHóspedes cadastrados: ${estado.hospedes.length}\nEventos confirmados: ${estado.eventos.length}\nReceita de hospedagem: ${dinheiro(hospedagem)}\nReceita de eventos: ${dinheiro(eventos)}\nReceita total: ${dinheiro(hospedagem + eventos)}`); }
+      function menu(usuario) { while (true) { const op = perguntar(`[${hotel} — Menu principal]\n1 Reservas de Quartos\n2 Cadastro de Hóspedes\n3 Eventos\n4 Ar-Condicionado\n5 Abastecimento\n6 Relatórios Operacionais\n7 Sair`); if (op === null) { exibir('Sessão encerrada.'); return; } switch (op.trim()) { case '1': reservas(usuario); break; case '2': hospedes(); break; case '3': eventos(); break; case '4': arCondicionado(usuario); break; case '5': abastecimento(usuario); break; case '6': relatorios(); break; case '7': alert(`Muito obrigado e até logo, ${usuario}.`); exibir('Sessão encerrada.'); return; default: falha(); } } }
+      const usuario = autenticar(); if (usuario) menu(usuario); else exibir('Acesso encerrado.');
+    })();
+  </script>
 </body>
 
 </html>
